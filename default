@@ -1,0 +1,44 @@
+server {
+    listen       80;
+    server_name  soleilshadess.cf;
+
+    location / {
+        root   /usr/local/nginx/html;
+        index  index.php index.html index.htm;
+		if (!-e $request_filename) {
+			rewrite ^/(.*) /index.php?_page_url=$1 last;
+		}
+		
+    }
+	
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+	    location ~ \.php$ {
+        if (!-e $request_filename) { rewrite ^/(.*) /index.php?_page_url=$1 last; }
+		try_files $uri =404;
+        fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME   $document_root$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+
+
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   html;
+    }
+
+    location /files/ {
+        internal;
+    }
+
+    # these locations would be hidden by .htaccess normally
+    location /core/logs/ {
+        deny all;
+    }
+	
+}
